@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kraamzorg Prep Companion - 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Nursery (Beige, Sage, and Soft Slate) -->
+    <!-- Application Structure Plan: 
+        The application uses a thematic dashboard approach. 
+        1. Overview: Quick status and summary.
+        2. Interactive Checklists: Categorized lists for Baby, Mother, and Hospital with persistent progress tracking.
+        3. ARBO & Safety: Interactive cards explaining Dutch safety regulations (80cm height, etc.).
+        4. Finance Hub: A dynamic calculator for LIP hours and co-payments based on 2026 rates.
+        5. Intake Prep: A dedicated module for the intake meeting and questions.
+        This structure is chosen to reduce the "information overload" of a long PDF by allowing parents to focus on one category at a time while seeing their overall readiness.
+    -->
+    <!-- Visualization & Content Choices: 
+        - Goal: Tracking Progress -> Method: Progress bars and interactive checkboxes -> Interaction: LocalStorage persistence.
+        - Goal: Compare Hours -> Method: Bar Chart (Chart.js) showing Breastfeeding vs. Formula hours -> Justification: Visualizing the LIP protocol differences.
+        - Goal: Calculate Costs -> Method: Dynamic JS calculator -> Interaction: User inputs hours to see the €5.70/hr total.
+        - NO SVG used. Icons are Unicode or CSS-based. NO Mermaid JS used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #FAF9F6; color: #334155; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .custom-checkbox:checked { background-color: #84a59d; border-color: #84a59d; }
+        .tab-active { border-bottom: 2px solid #84a59d; color: #84a59d; font-weight: 600; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Navigation Header -->
+    <nav class="sticky top-0 z-50 bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-sage-200 rounded-full flex items-center justify-center bg-[#84a59d] text-white font-bold">K</div>
+                    <span class="text-xl font-semibold tracking-tight">Prep Companion <span class="text-sm font-normal text-slate-400">2026</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="showSection('checklists')" class="nav-link tab-active py-5 transition-all">Checklists</button>
+                    <button onclick="showSection('safety')" class="nav-link py-5 transition-all text-slate-500 hover:text-slate-800">Home & Safety</button>
+                    <button onclick="showSection('finance')" class="nav-link py-5 transition-all text-slate-500 hover:text-slate-800">Finance</button>
+                    <button onclick="showSection('intake')" class="nav-link py-5 transition-all text-slate-500 hover:text-slate-800">Intake Meeting</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        
+        <!-- Dashboard Overview -->
+        <section id="overview" class="mb-10 fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Progress</h3>
+                    <div class="flex items-end space-x-2">
+                        <span id="global-progress-text" class="text-4xl font-bold text-[#84a59d]">0%</span>
+                        <span class="text-slate-400 mb-1">completed</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full mt-4">
+                        <div id="global-progress-bar" class="bg-[#84a59d] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl shadow-sm border-l-4 border-amber-400">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Key Rule</h3>
+                    <p class="text-slate-700 font-medium">Bed Height: Min 80cm</p>
+                    <p class="text-xs text-slate-400 mt-1">Required by week 37 for ARBO safety.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Emergency Line</h3>
+                    <p class="text-slate-700 font-bold">088-130 1718</p>
+                    <p class="text-xs text-slate-400 mt-1">24/7 Delivery Line (Bevallingslijn)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklists Section -->
+        <section id="checklists-section" class="section-content fade-in">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Essential Checklists</h2>
+                <p class="text-slate-500 mt-2">Manage your preparation items. Your progress is saved automatically.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Checklist Sidebar -->
+                <div class="lg:col-span-1 space-y-2">
+                    <button onclick="filterChecklist('baby')" class="list-btn w-full text-left px-4 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors flex justify-between items-center group active-list-btn">
+                        <span>Baby Essentials</span>
+                        <span class="text-xs font-bold text-slate-400 group-hover:text-[#84a59d]" id="count-baby">0/0</span>
+                    </button>
+                    <button onclick="filterChecklist('mother')" class="list-btn w-full text-left px-4 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors flex justify-between items-center group">
+                        <span>Mother & Recovery</span>
+                        <span class="text-xs font-bold text-slate-400 group-hover:text-[#84a59d]" id="count-mother">0/0</span>
+                    </button>
+                    <button onclick="filterChecklist('hospital')" class="list-btn w-full text-left px-4 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors flex justify-between items-center group">
+                        <span>Hospital Bag</span>
+                        <span class="text-xs font-bold text-slate-400 group-hover:text-[#84a59d]" id="count-hospital">0/0</span>
+                    </button>
+                </div>
+
+                <!-- Active Checklist Display -->
+                <div class="lg:col-span-3">
+                    <div id="items-container" class="space-y-3">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Home & Safety Section -->
+        <section id="safety-section" class="section-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Home & Safety Regulations</h2>
+                <p class="text-slate-500 mt-2">Essential ARBO and safety standards according to 202603_Digitale_Brochure_def.pdf.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 rounded-2xl border border-slate-200 bg-white">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4 text-xl">📏</div>
+                    <h3 class="text-lg font-semibold mb-2">Ergonomic Care Height</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        To protect the nurse's back, your bed, changing table (*commode*), and bath stand must be at least **80 cm** high.
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-500">
+                        <li>• Measured floor to mattress top</li>
+                        <li>• Borrow 'Bedverhogers' (Klossen) for free</li>
+                        <li>• Must be ready by Week 37</li>
+                    </ul>
+                </div>
+
+                <div class="p-6 rounded-2xl border border-slate-200 bg-white">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 text-xl">🛌</div>
+                    <h3 class="text-lg font-semibold mb-2">Safe Sleep Rules</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        Guidelines to prevent accidents and SIDS in the first critical weeks.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded-lg border-l-2 border-slate-300">
+                        <p class="text-xs font-bold text-slate-700">NO AEROSLEEP TOPPERS</p>
+                        <p class="text-xs text-slate-500">In the first week with metal bottles (*kruiken*), toppers prevent water from draining, risking burns.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Finance Section -->
+        <section id="finance-section" class="section-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Insurance & Costs (2026)</h2>
+                <p class="text-slate-500 mt-2">Maternity care is covered by basic insurance, but statutory co-payments apply.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="glass-card p-8 rounded-3xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-6">Co-payment Calculator</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Estimated Care Hours (LIP)</label>
+                            <input type="number" id="input-hours" value="49" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#84a59d] outline-none transition-all" oninput="calculateCosts()">
+                            <p class="text-[10px] text-slate-400 mt-2">Standard is 49 for Breastfeeding, 45 for Formula.</p>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100">
+                            <div class="flex justify-between text-sm text-slate-500 mb-2">
+                                <span>Rate (2026 Statutory)</span>
+                                <span>€5.70 / hour</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold text-slate-800">
+                                <span>Total Co-payment</span>
+                                <span id="total-cost" class="text-[#84a59d]">€279.30</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#f0f4f3] p-4 rounded-xl">
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                <span class="font-bold">Tip:</span> Check your supplementary insurance (*aanvullende verzekering*). Many plans cover this total €5.70/hr fee.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="hoursChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Intake Section -->
+        <section id="intake-section" class="section-content hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Intake Meeting Preparation</h2>
+                <p class="text-slate-500 mt-2">Prepare for your meeting with Kraamzorg de Waarden (usually between week 25-34).</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center">
+                        <span class="mr-2">📝</span> Essential Questions to Ask
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="questions-grid">
+                        <!-- Questions injected by JS -->
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 text-white rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-slate-400 text-xs uppercase tracking-widest font-bold">Registration Reference</p>
+                        <h4 class="text-lg font-semibold">"Refer to 202603_Digitale_Brochure_def.pdf"</h4>
+                    </div>
+                    <button class="bg-white text-slate-800 px-6 py-2 rounded-full font-bold text-sm hover:bg-slate-100 transition-colors">Download Brochure</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- DATA STORE ---
+        const data = {
+            baby: [
+                { id: 'b1', text: '8x Rompers (Size 50-56)', category: 'baby' },
+                { id: 'b2', text: '2x Soft Hats (Mutsjes)', category: 'baby' },
+                { id: 'b3', text: '2x Metal seamless water bottles (Kruiken)', category: 'baby' },
+                { id: 'b4', text: '12x Hydrophilic cloths (60x60cm)', category: 'baby' },
+                { id: 'b5', text: 'Firm Mattress (no Aerosleep first week)', category: 'baby' },
+                { id: 'b6', text: 'Vitamin K and D (from day 8)', category: 'baby' }
+            ],
+            mother: [
+                { id: 'm1', text: 'Maternity Package (Kraampakket)', category: 'mother' },
+                { id: 'm2', text: '2x Digital Thermometers (one for you, one for baby)', category: 'mother' },
+                { id: 'm3', text: 'Rinsing bottle (for perineal care)', category: 'mother' },
+                { id: 'm4', text: 'High-waisted cotton briefs', category: 'mother' },
+                { id: 'm5', text: 'Nursing bras / Breast pads', category: 'mother' }
+            ],
+            hospital: [
+                { id: 'h1', text: 'ID Card & Insurance details', category: 'hospital' },
+                { id: 'h2', text: 'Loose clothing for labor', category: 'hospital' },
+                { id: 'h3', text: 'Maxi-Cosi / Infant Car Seat', category: 'hospital' },
+                { id: 'h4', text: 'Baby outfit in 2 sizes (50 & 56)', category: 'hospital' },
+                { id: 'h5', text: 'Long phone charger', category: 'hospital' }
+            ],
+            questions: [
+                { q: "Continuity", text: "Will we have the same nurse for the full 8 days?" },
+                { q: "Nights", text: "Is night-time 'start-up care' available if discharged late?" },
+                { q: "Peak Season", text: "What is your policy if labor starts during a peak demand week?" },
+                { q: "Household", text: "What specific sanitizing/cleaning tasks does the nurse handle?" },
+                { q: "Baby Manager", text: "How do we activate our 24/7 app access?" }
+            ]
+        };
+
+        let currentFilter = 'baby';
+        let progress = JSON.parse(localStorage.getItem('kraamzorg_progress')) || {};
+
+        // --- NAVIGATION ---
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('tab-active', 'text-slate-800'));
+            const activeBtn = Array.from(document.querySelectorAll('.nav-link')).find(b => b.innerText.toLowerCase().includes(sectionId.substring(0,3)));
+            if (activeBtn) activeBtn.classList.add('tab-active');
+
+            if (sectionId === 'finance') initChart();
+        }
+
+        // --- CHECKLIST LOGIC ---
+        function filterChecklist(cat) {
+            currentFilter = cat;
+            document.querySelectorAll('.list-btn').forEach(b => b.classList.remove('bg-[#f8faf9]', 'border-[#84a59d]', 'font-bold'));
+            const activeBtn = Array.from(document.querySelectorAll('.list-btn')).find(b => b.innerText.toLowerCase().includes(cat));
+            activeBtn.classList.add('bg-[#f8faf9]', 'border-[#84a59d]', 'font-bold');
+            renderItems();
+        }
+
+        function toggleItem(id) {
+            progress[id] = !progress[id];
+            localStorage.setItem('kraamzorg_progress', JSON.stringify(progress));
+            renderItems();
+            updateProgress();
+        }
+
+        function renderItems() {
+            const container = document.getElementById('items-container');
+            const items = data[currentFilter];
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const isChecked = progress[item.id] || false;
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-xl border transition-all flex items-center space-x-4 ${isChecked ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200'}`;
+                div.innerHTML = `
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleItem('${item.id}')" 
+                           class="custom-checkbox w-5 h-5 rounded border-slate-300 text-[#84a59d] focus:ring-[#84a59d]">
+                    <span class="text-sm font-medium ${isChecked ? 'line-through text-slate-400' : 'text-slate-700'}">${item.text}</span>
+                `;
+                container.appendChild(div);
+            });
+            updateCounts();
+        }
+
+        function updateCounts() {
+            ['baby', 'mother', 'hospital'].forEach(cat => {
+                const total = data[cat].length;
+                const done = data[cat].filter(i => progress[i.id]).length;
+                document.getElementById(`count-${cat}`).innerText = `${done}/${total}`;
+            });
+        }
+
+        function updateProgress() {
+            const totalItems = [...data.baby, ...data.mother, ...data.hospital].length;
+            const checkedCount = Object.values(progress).filter(v => v === true).length;
+            const percentage = Math.round((checkedCount / totalItems) * 100);
+            
+            document.getElementById('global-progress-bar').style.width = percentage + '%';
+            document.getElementById('global-progress-text').innerText = percentage + '%';
+        }
+
+        // --- FINANCE LOGIC ---
+        function calculateCosts() {
+            const hours = document.getElementById('input-hours').value || 0;
+            const total = (hours * 5.70).toFixed(2);
+            document.getElementById('total-cost').innerText = `€${total}`;
+        }
+
+        let chartInstance = null;
+        function initChart() {
+            if (chartInstance) return;
+            const ctx = document.getElementById('hoursChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Breastfeeding', 'Formula'],
+                    datasets: [{
+                        label: 'LIP Standard Hours',
+                        data: [49, 45],
+                        backgroundColor: ['#84a59d', '#b7cdbd'],
+                        borderRadius: 8,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw} Care Hours (Spread over 8 days)`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- INTAKE LOGIC ---
+        function renderQuestions() {
+            const grid = document.getElementById('questions-grid');
+            data.questions.forEach(q => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-50 rounded-xl border border-slate-100";
+                div.innerHTML = `
+                    <p class="text-xs font-bold text-[#84a59d] mb-1 uppercase">${q.q}</p>
+                    <p class="text-sm text-slate-700">${q.text}</p>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            renderItems();
+            updateProgress();
+            renderQuestions();
+            filterChecklist('baby');
+        };
+    </script>
+</body>
+</html>
