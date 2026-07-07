@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Preparation Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        /* Custom Checkbox Styling */
+        .custom-checkbox {
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.5em;
+            height: 1.5em;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.35em;
+            display: grid;
+            place-content: center;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .custom-checkbox::before {
+            content: "";
+            width: 0.85em;
+            height: 0.85em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .custom-checkbox:checked {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        .item-row {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen pb-20">
+
+    <!-- Header & Overall Progress -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Baby Preparation Checklist</h1>
+                    <p class="text-sm text-slate-500 mt-1">Track your essentials for before, during, and after pregnancy.</p>
+                </div>
+                <div class="w-full md:w-64 bg-slate-100 rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Progress</span>
+                        <span id="overall-percentage" class="text-sm font-bold text-emerald-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div id="overall-progress-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex gap-2 mt-6 overflow-x-auto pb-2">
+                <button onclick="setFilter('all')" id="btn-all" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-slate-800 text-white transition-colors">
+                    All Items
+                </button>
+                <button onclick="setFilter('pending')" id="btn-pending" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                    Pending
+                </button>
+                <button onclick="setFilter('completed')" id="btn-completed" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                    Completed
+                </button>
+                <button onclick="resetProgress()" class="ml-auto px-4 py-2 rounded-full text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 transition-colors">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="checklist-container">
+        <!-- Sections will be injected here by JavaScript -->
+    </main>
+
+    <script>
+        // Data Structure
+        const checklistData = [
+            {
+                id: 'prenatal',
+                title: 'Stage 1: Prenatal (Home Preparation)',
+                description: 'Set up your home and keep yourself comfortable during pregnancy.',
+                color: 'bg-blue-500',
+                items: [
+                    { id: 'pre-1', title: 'Comfortable maternity bottoms', desc: 'Leggings or pants with a stretchy belly band.' },
+                    { id: 'pre-2', title: 'Supportive nursing bras', desc: '2-3 seamless, wire-free bras that grow with you.' },
+                    { id: 'pre-3', title: 'Flat, slip-on shoes', desc: 'Easy to put on without bending over.' },
+                    { id: 'pre-4', title: 'Prenatal vitamins', desc: 'Supports your health and baby\'s development.' },
+                    { id: 'pre-5', title: 'Pregnancy body pillow', desc: 'U-shape or C-shape pillow for comfortable side sleeping.' },
+                    { id: 'pre-6', title: 'Belly oil or lotion', desc: 'Moisturizes and soothes stretching, itchy skin.' },
+                    { id: 'pre-7', title: 'Infant car seat', desc: 'Non-negotiable safety item, must be installed before labor.' },
+                    { id: 'pre-8', title: 'Crib, bassinet, or co-sleeper', desc: 'A safe, flat sleep space for the baby.' },
+                    { id: 'pre-9', title: 'Firm baby mattress', desc: 'Must fit the sleep space perfectly with no gaps.' },
+                    { id: 'pre-10', title: 'Waterproof mattress protectors (2-3)', desc: 'Essential for keeping the mattress clean from leaks.' },
+                    { id: 'pre-11', title: 'Fitted crib sheets (2-3)', desc: 'Must fit tightly over the mattress.' }
+                ]
+            },
+            {
+                id: 'hospital',
+                title: 'Stage 2: Labor and Delivery (Hospital Bag)',
+                description: 'Pack around week 36 so you are ready to go.',
+                color: 'bg-purple-500',
+                items: [
+                    { id: 'hosp-1', title: 'Important documents', desc: 'ID, insurance card, and hospital registration forms.' },
+                    { id: 'hosp-2', title: 'Birth plan (printed copies)', desc: 'Simple outline of your preferences for nurses and doctors.' },
+                    { id: 'hosp-3', title: 'Comfortable delivery clothes', desc: 'Loose, dark-colored nightgown or oversized t-shirt.' },
+                    { id: 'hosp-4', title: 'Post-delivery outfit', desc: 'Loose, soft clothing for recovery and the ride home.' },
+                    { id: 'hosp-5', title: 'Robe and slip-on slippers', desc: 'For walking the halls and staying warm.' },
+                    { id: 'hosp-6', title: 'Extra-long phone charging cable', desc: '10-foot cord for hard-to-reach hospital outlets.' },
+                    { id: 'hosp-7', title: 'Travel toiletries and lip balm', desc: 'Lip balm, toothbrush, hair ties, gentle face wash.' },
+                    { id: 'hosp-8', title: 'Going-home outfit (in 2 sizes)', desc: 'Pack one "Newborn" and one "0-3 Months" size outfit.' },
+                    { id: 'hosp-9', title: 'Newborn hat and scratch mittens', desc: 'Keeps head warm and prevents accidental face scratches.' },
+                    { id: 'hosp-10', title: 'Warm baby blanket', desc: 'To tuck over the baby in the car seat (not under straps).' },
+                    { id: 'hosp-11', title: 'Snacks and reusable water bottles', desc: 'For the support person during a long stay.' },
+                    { id: 'hosp-12', title: 'Change of clothes & toiletries', desc: 'For your partner or support person.' }
+                ]
+            },
+            {
+                id: 'postnatal',
+                title: 'Stage 3: Postnatal (Baby Care at Home)',
+                description: 'Stock up on these during your 3rd trimester to focus on resting once baby is home.',
+                color: 'bg-amber-500',
+                items: [
+                    { id: 'post-1', title: 'Heavy-duty maternity pads', desc: 'Highly absorbent, soft pads for postpartum bleeding.' },
+                    { id: 'post-2', title: 'Peri bottle', desc: 'Angled squirt bottle for gentle cleansing after using the bathroom.' },
+                    { id: 'post-3', title: 'Nipple cream', desc: 'Soothing ointment for cracked or sore nipples (if breastfeeding).' },
+                    { id: 'post-4', title: 'Comfortable, high-waisted underwear', desc: 'Full coverage, won\'t irritate a C-section incision.' },
+                    { id: 'post-5', title: 'Bodysuits / Onesies (6-8)', desc: 'Envelope-style shoulders for easy pulling down during blowouts.' },
+                    { id: 'post-6', title: 'Footed sleepsuits / Pajamas (4-6)', desc: 'Zippers are faster and easier than snaps for night changes.' },
+                    { id: 'post-7', title: 'Newborn diapers (2-3 packs)', desc: 'Enough for the first two weeks (expect 8-10 changes/day).' },
+                    { id: 'post-8', title: 'Fragrance-free baby wipes', desc: 'Gentle wipes for sensitive newborn skin.' },
+                    { id: 'post-9', title: 'Hydrophilic cloths / Muslin squares (10-15)', desc: 'Highly absorbent; use as towels, burp cloths, or covers.' },
+                    { id: 'post-10', title: 'Baby bathtub', desc: 'Small, supportive tub designed for safe bathing.' },
+                    { id: 'post-11', title: 'Changing pad', desc: 'Contoured, wipeable cushion for dresser or changing table.' },
+                    { id: 'post-12', title: 'Burp cloths (8-10)', desc: 'Soft fabric to catch spit-up after feeds.' },
+                    { id: 'post-13', title: 'Nursing pillow', desc: 'Props baby up for feeding, saving your back and arms.' },
+                    { id: 'post-14', title: 'Newborn baby bottles (2-3)', desc: 'Good backup to have, even if planning to breastfeed.' },
+                    { id: 'post-15', title: 'Bottle brush', desc: 'Specialized brush to clean inside bottles and nipples.' },
+                    { id: 'post-16', title: 'Breast pump (optional)', desc: 'Useful for relieving engorgement or partner feedings.' },
+                    { id: 'post-17', title: 'Swaddle blankets or sleep sacks (2-3)', desc: 'Mimics the womb and prevents startle reflex.' },
+                    { id: 'post-18', title: 'Pacifiers (2-3)', desc: 'Great for soothing; try a few different shapes.' },
+                    { id: 'post-19', title: 'Digital rectal thermometer', desc: 'The most accurate way to check a newborn\'s temperature.' },
+                    { id: 'post-20', title: 'Baby nail file or safety clippers', desc: 'Prevents scratches from fast-growing, sharp newborn nails.' },
+                    { id: 'post-21', title: 'Vitamin D and K drops', desc: 'Consult your pediatrician for dosage to support health.' }
+                ]
+            }
+        ];
+
+        // State Management
+        let userProgress = JSON.parse(localStorage.getItem('babyChecklistProgress')) || {};
+        let currentFilter = 'all'; // 'all', 'pending', 'completed'
+
+        // Save state to local storage
+        function saveProgress() {
+            localStorage.setItem('babyChecklistProgress', JSON.stringify(userProgress));
+            updateUI();
+        }
+
+        // Reset progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all your progress?')) {
+                userProgress = {};
+                saveProgress();
+            }
+        }
+
+        // Handle checkbox click
+        function toggleItem(itemId) {
+            userProgress[itemId] = !userProgress[itemId];
+            saveProgress();
+        }
+
+        // Change filter
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            
+            const activeBtn = document.getElementById(`btn-${filterType}`);
+            activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+            activeBtn.classList.add('bg-slate-800', 'text-white');
+
+            renderList();
+        }
+
+        // Calculate progress statistics
+        function getProgressStats() {
+            let totalItems = 0;
+            let totalCompleted = 0;
+            const categoryStats = {};
+
+            checklistData.forEach(category => {
+                const catTotal = category.items.length;
+                const catCompleted = category.items.filter(item => userProgress[item.id]).length;
+                
+                categoryStats[category.id] = {
+                    total: catTotal,
+                    completed: catCompleted,
+                    percentage: Math.round((catCompleted / catTotal) * 100) || 0
+                };
+
+                totalItems += catTotal;
+                totalCompleted += catCompleted;
+            });
+
+            return {
+                total: totalItems,
+                completed: totalCompleted,
+                percentage: Math.round((totalCompleted / totalItems) * 100) || 0,
+                categories: categoryStats
+            };
+        }
+
+        // Update progress bars and labels
+        function updateUI() {
+            const stats = getProgressStats();
+            
+            // Update overall
+            document.getElementById('overall-progress-bar').style.width = `${stats.percentage}%`;
+            document.getElementById('overall-percentage').textContent = `${stats.percentage}%`;
+
+            // Update categories
+            checklistData.forEach(category => {
+                const catStats = stats.categories[category.id];
+                const bar = document.getElementById(`progress-${category.id}`);
+                const label = document.getElementById(`text-${category.id}`);
+                
+                if (bar) bar.style.width = `${catStats.percentage}%`;
+                if (label) label.textContent = `${catStats.completed} / ${catStats.total}`;
+            });
+
+            // Re-render list to apply filters and strikethroughs correctly
+            renderList();
+        }
+
+        // Render the checklist HTML
+        function renderList() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+
+            checklistData.forEach(category => {
+                // Filter items for this category based on currentFilter
+                const filteredItems = category.items.filter(item => {
+                    const isChecked = !!userProgress[item.id];
+                    if (currentFilter === 'pending') return !isChecked;
+                    if (currentFilter === 'completed') return isChecked;
+                    return true; // 'all'
+                });
+
+                // Skip rendering category if no items match the filter
+                if (filteredItems.length === 0 && currentFilter !== 'all') return;
+
+                const categoryStats = getProgressStats().categories[category.id];
+
+                // Create Category Section
+                const section = document.createElement('section');
+                section.className = 'bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden';
+                
+                // Category Header
+                let headerHTML = `
+                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full ${category.color}"></span>
+                                ${category.title}
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1 ml-5">${category.description}</p>
+                        </div>
+                        <div class="w-full sm:w-48">
+                            <div class="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                                <span>Progress</span>
+                                <span id="text-${category.id}">${categoryStats.completed} / ${categoryStats.total}</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div id="progress-${category.id}" class="${category.color} h-2 rounded-full transition-all duration-500 ease-out" style="width: ${categoryStats.percentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                `;
+
+                // Items list
+                let itemsHTML = '';
+                if (filteredItems.length === 0) {
+                     itemsHTML = `<div class="p-8 text-center text-slate-400 italic">No items found in this view.</div>`;
+                } else {
+                    filteredItems.forEach(item => {
+                        const isChecked = !!userProgress[item.id];
+                        const textStyle = isChecked ? 'line-through text-slate-400' : 'text-slate-800';
+                        const descStyle = isChecked ? 'opacity-50' : 'text-slate-500';
+                        const bgStyle = isChecked ? 'bg-slate-50' : 'bg-white hover:bg-slate-50';
+
+                        itemsHTML += `
+                            <label class="item-row flex items-start gap-4 p-5 cursor-pointer transition-colors ${bgStyle}">
+                                <div class="pt-1">
+                                    <input type="checkbox" class="custom-checkbox" 
+                                        ${isChecked ? 'checked' : ''} 
+                                        onchange="toggleItem('${item.id}')">
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-base transition-colors ${textStyle}">${item.title}</h3>
+                                    <p class="text-sm mt-1 transition-opacity ${descStyle}">${item.desc}</p>
+                                </div>
+                            </label>
+                        `;
+                    });
+                }
+
+                section.innerHTML = headerHTML + itemsHTML + '</div>';
+                container.appendChild(section);
+            });
+        }
+
+        // Initial Load
+        renderList();
+        updateUI();
+
+    </script>
+</body>
+</html>
