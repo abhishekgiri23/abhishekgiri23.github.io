@@ -57,7 +57,6 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen pb-20">
 
-    <!-- Header & Overall Progress -->
     <header class="bg-white shadow-sm sticky top-0 z-10">
         <div class="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -76,7 +75,6 @@
                 </div>
             </div>
 
-            <!-- Filters -->
             <div class="flex gap-2 mt-6 overflow-x-auto pb-2">
                 <button onclick="setFilter('all')" id="btn-all" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-slate-800 text-white transition-colors">
                     All Items
@@ -94,10 +92,8 @@
         </div>
     </header>
 
-    <!-- Main Content Container -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="checklist-container">
-        <!-- Sections will be injected here by JavaScript -->
-    </main>
+        </main>
 
     <script>
         // Data Structure
@@ -118,7 +114,15 @@
                     { id: 'pre-8', title: 'Crib, bassinet, or co-sleeper', desc: 'A safe, flat sleep space for the baby.' },
                     { id: 'pre-9', title: 'Firm baby mattress', desc: 'Must fit the sleep space perfectly with no gaps.' },
                     { id: 'pre-10', title: 'Waterproof mattress protectors (2-3)', desc: 'Essential for keeping the mattress clean from leaks.' },
-                    { id: 'pre-11', title: 'Fitted crib sheets (2-3)', desc: 'Must fit tightly over the mattress.' }
+                    { id: 'pre-11', title: 'Fitted crib sheets (2-3)', desc: 'Must fit tightly over the mattress.' },
+                    { id: 'pre-12', title: 'Bed raisers', desc: 'To easily elevate your bed for maternity care.' },
+                    { id: 'pre-13', title: 'Maternity package (Kraampakket)', desc: 'Request through your health insurer or order online.' },
+                    { id: 'pre-14', title: 'Sets of bed linen (3)', desc: '2 sets if there is a tumble dryer.' },
+                    { id: 'pre-15', title: 'Molton fitted sheets (2)', desc: 'Highly absorbent protective sheets.' },
+                    { id: 'pre-16', title: 'Top sheets (3)', desc: '2 sets if there is a tumble dryer.' },
+                    { id: 'pre-17', title: 'Baby blankets (2)', desc: 'Choose cotton for a warmer season and wool/fleece for a colder season.' },
+                    { id: 'pre-18', title: 'Aluminium seamless hot water bottles (2)', desc: 'Check for damage during pregnancy.' },
+                    { id: 'pre-19', title: 'Hot water bottle covers (2)', desc: 'Must not be padded.' }
                 ]
             },
             {
@@ -155,19 +159,51 @@
                     { id: 'post-6', title: 'Footed sleepsuits / Pajamas (4-6)', desc: 'Zippers are faster and easier than snaps for night changes.' },
                     { id: 'post-7', title: 'Newborn diapers (2-3 packs)', desc: 'Enough for the first two weeks (expect 8-10 changes/day).' },
                     { id: 'post-8', title: 'Fragrance-free baby wipes', desc: 'Gentle wipes for sensitive newborn skin.' },
-                    { id: 'post-9', title: 'Hydrophilic cloths / Muslin squares (10-15)', desc: 'Highly absorbent; use as towels, burp cloths, or covers.' },
-                    { id: 'post-10', title: 'Baby bathtub', desc: 'Small, supportive tub designed for safe bathing.' },
+                    { id: 'post-9', title: 'Hydrophilic cloths / Muslin squares (12)', desc: 'Highly absorbent; use as towels, burp cloths, or covers.' },
+                    { id: 'post-10', title: 'Baby bathtub', desc: 'Small, supportive tub with bath stand (preferably with drain plug).' },
                     { id: 'post-11', title: 'Changing pad', desc: 'Contoured, wipeable cushion for dresser or changing table.' },
-                    { id: 'post-12', title: 'Burp cloths (8-10)', desc: 'Soft fabric to catch spit-up after feeds.' },
-                    { id: 'post-13', title: 'Nursing pillow', desc: 'Props baby up for feeding, saving your back and arms.' },
-                    { id: 'post-14', title: 'Newborn baby bottles (2-3)', desc: 'Good backup to have, even if planning to breastfeed.' },
+                    { id: 'post-12', title: 'Burp cloths (8)', desc: 'Soft fabric to catch spit-up after feeds.' },
+                    { id: 'post-13', title: 'Nursing pillow', desc: 'Props baby up for feeding, saving your back and arms (optional).' },
+                    { id: 'post-14', title: 'Newborn baby bottles (2)', desc: 'Good backup to have, even if planning to breastfeed.' },
                     { id: 'post-15', title: 'Bottle brush', desc: 'Specialized brush to clean inside bottles and nipples.' },
                     { id: 'post-16', title: 'Breast pump (optional)', desc: 'Useful for relieving engorgement or partner feedings.' },
                     { id: 'post-17', title: 'Swaddle blankets or sleep sacks (2-3)', desc: 'Mimics the womb and prevents startle reflex.' },
-                    { id: 'post-18', title: 'Pacifiers (2-3)', desc: 'Great for soothing; try a few different shapes.' },
-                    { id: 'post-19', title: 'Digital rectal thermometer', desc: 'The most accurate way to check a newborn\'s temperature.' },
-                    { id: 'post-20', title: 'Baby nail file or safety clippers', desc: 'Prevents scratches from fast-growing, sharp newborn nails.' },
-                    { id: 'post-21', title: 'Vitamin D and K drops', desc: 'Consult your pediatrician for dosage to support health.' }
+                    { id: 'post-18', title: 'Pacifiers (2)', desc: 'Great for soothing; try a few different shapes (special for newborns).' },
+                    { id: 'post-19', title: 'Digital clinical thermometer (Baby)', desc: 'The most accurate way to check a newborn\'s temperature (no ear/infrared).' },
+                    { id: 'post-20', title: 'Baby nail file or safety clippers', desc: 'Cardboard file prevents scratches from fast-growing newborn nails.' },
+                    { id: 'post-21', title: 'Vitamin D and K drops', desc: 'Consult your pediatrician for dosage to support health.' },
+                    { id: 'post-22', title: 'Digital clinical thermometer (Mother)', desc: 'Separate thermometer for the mother (no ear/infrared).' },
+                    { id: 'post-23', title: 'Hydrophilic washcloths (6)', desc: 'Soft, absorbent washcloths for bathing.' },
+                    { id: 'post-24', title: 'Baby wash gel', desc: 'Gentle cleanser for bath time.' },
+                    { id: 'post-25', title: 'Hair brush & comb', desc: 'Soft bristle brush for newborns.' },
+                    { id: 'post-26', title: 'Bath capes or large bath towels (2)', desc: 'To keep baby warm immediately after bathing.' },
+                    { id: 'post-27', title: 'Vaseline or moisturizing cream', desc: 'For baby\'s face and bottom.' },
+                    { id: 'post-28', title: 'Baby Formula', desc: 'In consultation with obstetrician or family doctor.' },
+                    { id: 'post-29', title: 'Nursing pads', desc: 'To absorb milk leaks.' },
+                    { id: 'post-30', title: 'Breastmilk storage containers/bags', desc: 'Optional: for storing pumped milk.' },
+                    { id: 'post-31', title: 'Breastfeeding starter set', desc: 'Optional: helpful essentials for nursing.' }
+                ]
+            },
+            {
+                id: 'maternity',
+                title: 'Stage 4: Maternity Care & Home Birth Essentials',
+                description: 'Specific household and medical items required for the maternity nurse (Kraamzorg) and home birth.',
+                color: 'bg-rose-500',
+                items: [
+                    { id: 'mat-1', title: 'Toilet paper (1 roll)', desc: 'Extra supply for the birth/maternity kit.' },
+                    { id: 'mat-2', title: 'Package of salt (1)', desc: 'For rinsing birth laundry.' },
+                    { id: 'mat-3', title: 'Buckets (2)', desc: 'At least 1 new or clean to fill baby\'s bath.' },
+                    { id: 'mat-4', title: 'Bin bags (2)', desc: 'For waste disposal during and after birth.' },
+                    { id: 'mat-5', title: 'Kitchen roll / paper towels (1 pack)', desc: 'For quick cleanups.' },
+                    { id: 'mat-6', title: 'Emergency lighting (1 torch)', desc: 'In case of power outages.' },
+                    { id: 'mat-7', title: 'Unperfumed hand gel soap dispenser', desc: 'If not included in basic childbirth set.' },
+                    { id: 'mat-8', title: 'Bottle of disinfectant (1)', desc: 'If required by the obstetrician.' },
+                    { id: 'mat-9', title: 'Plastic sandwich bags (1 box)', desc: 'For disposing of sanitary pads.' },
+                    { id: 'mat-10', title: 'Long sterile gloves (1 pair)', desc: 'Mandatory for the maternity nurse during a water birth.' },
+                    { id: 'mat-11', title: 'Cleaning cloths (6)', desc: 'Must be washable at 60°C.' },
+                    { id: 'mat-12', title: 'Mop with telescopic handle (1)', desc: 'For household cleaning by the maternity nurse.' },
+                    { id: 'mat-13', title: 'Portable laundry basket (1)', desc: 'To easily transport laundry.' },
+                    { id: 'mat-14', title: 'Serving tray (1)', desc: 'For bringing meals to bed during recovery.' }
                 ]
             }
         ];
