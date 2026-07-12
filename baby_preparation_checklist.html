@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baby Preparation Checklist</title>
+    <!-- Tailwind CSS for modern responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font Family for clean UI look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -51,53 +54,136 @@
         }
 
         .item-row {
-            transition: opacity 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        /* Smooth custom transitions for modern modal popups */
+        .modal-active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: scale(1) !important;
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen pb-20">
+<body class="text-slate-800 antialiased min-h-screen pb-20 relative">
 
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    <!-- Header & Overall Progress -->
+    <header class="bg-white shadow-sm sticky top-0 z-30 border-b border-slate-100">
+        <div class="max-w-4xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Baby Preparation Checklist</h1>
-                    <p class="text-sm text-slate-500 mt-1">Track your essentials for before, during, and after pregnancy.</p>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        🍼 Baby Preparation Checklist
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-1">Track and manage your essentials for before, during, and after pregnancy.</p>
                 </div>
-                <div class="w-full md:w-64 bg-slate-100 rounded-lg p-3">
+                <div class="w-full md:w-64 bg-slate-50 border border-slate-100 rounded-xl p-3 shadow-sm">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Progress</span>
                         <span id="overall-percentage" class="text-sm font-bold text-emerald-600">0%</span>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                         <div id="overall-progress-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-2 mt-6 overflow-x-auto pb-2">
-                <button onclick="setFilter('all')" id="btn-all" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-slate-800 text-white transition-colors">
-                    All Items
-                </button>
-                <button onclick="setFilter('pending')" id="btn-pending" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
-                    Pending
-                </button>
-                <button onclick="setFilter('completed')" id="btn-completed" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
-                    Completed
-                </button>
-                <button onclick="resetProgress()" class="ml-auto px-4 py-2 rounded-full text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 transition-colors">
-                    Reset
+            <!-- Filters & Reset actions -->
+            <div class="flex flex-wrap gap-2 mt-5 items-center justify-between border-t border-slate-100 pt-4">
+                <div class="flex gap-2 overflow-x-auto">
+                    <button onclick="setFilter('all')" id="btn-all" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-800 text-white transition-colors duration-150">
+                        All Items
+                    </button>
+                    <button onclick="setFilter('pending')" id="btn-pending" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors duration-150">
+                        Pending
+                    </button>
+                    <button onclick="setFilter('completed')" id="btn-completed" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors duration-150">
+                        Completed
+                    </button>
+                </div>
+                <button onclick="triggerResetConfirmModal()" class="px-4 py-2 rounded-full text-sm font-medium border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+                    </svg>
+                    Reset Progress
                 </button>
             </div>
         </div>
     </header>
 
+    <!-- Main Content Container -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="checklist-container">
-        </main>
+        <!-- Sections dynamically loaded by client JavaScript -->
+    </main>
+
+    <!-- CUSTOM MODAL: ADD NEW ITEM -->
+    <div id="add-item-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-95 transition-all duration-300 border border-slate-100">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span class="p-1 bg-emerald-50 rounded-lg text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                        </svg>
+                    </span>
+                    Add Custom Item
+                </h3>
+                <button onclick="closeAddItemModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <form id="add-item-form" onsubmit="handleItemSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="target-category-id">
+                
+                <div>
+                    <label for="item-title" class="block text-sm font-semibold text-slate-700 mb-1">Item Name *</label>
+                    <input type="text" id="item-title" required placeholder="e.g., Baby monitor" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                </div>
+                
+                <div>
+                    <label for="item-desc" class="block text-sm font-semibold text-slate-700 mb-1">Description (Optional)</label>
+                    <textarea id="item-desc" placeholder="e.g., Long range, high definition baby camera" rows="3" class="w-full px-3.5 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2.5 pt-2">
+                    <button type="button" onclick="closeAddItemModal()" class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm shadow-sm hover:shadow transition-all">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM MODAL: RESET -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform scale-95 transition-all duration-300 border border-slate-100">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Are you absolutely sure?</h3>
+                <p class="text-slate-500 text-sm mt-2">This will reset all your checklist progression tracking. Deleted or custom added items will remain preserved.</p>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2 text-sm">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors">Cancel</button>
+                <button onclick="executeReset()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium shadow-sm transition-colors">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION NOTIFY COMPONENT -->
+    <div id="toast-message" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 px-4 py-3 bg-slate-900 text-white rounded-lg shadow-xl text-sm">
+        <span id="toast-icon" class="text-emerald-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+        </span>
+        <span id="toast-text">Action successful</span>
+    </div>
 
     <script>
-        // Data Structure
-        const checklistData = [
+        // Default Structural Data
+        const defaultChecklistData = [
             {
                 id: 'prenatal',
                 title: 'Stage 1: Prenatal (Home Preparation)',
@@ -114,15 +200,7 @@
                     { id: 'pre-8', title: 'Crib, bassinet, or co-sleeper', desc: 'A safe, flat sleep space for the baby.' },
                     { id: 'pre-9', title: 'Firm baby mattress', desc: 'Must fit the sleep space perfectly with no gaps.' },
                     { id: 'pre-10', title: 'Waterproof mattress protectors (2-3)', desc: 'Essential for keeping the mattress clean from leaks.' },
-                    { id: 'pre-11', title: 'Fitted crib sheets (2-3)', desc: 'Must fit tightly over the mattress.' },
-                    { id: 'pre-12', title: 'Bed raisers', desc: 'To easily elevate your bed for maternity care.' },
-                    { id: 'pre-13', title: 'Maternity package (Kraampakket)', desc: 'Request through your health insurer or order online.' },
-                    { id: 'pre-14', title: 'Sets of bed linen (3)', desc: '2 sets if there is a tumble dryer.' },
-                    { id: 'pre-15', title: 'Molton fitted sheets (2)', desc: 'Highly absorbent protective sheets.' },
-                    { id: 'pre-16', title: 'Top sheets (3)', desc: '2 sets if there is a tumble dryer.' },
-                    { id: 'pre-17', title: 'Baby blankets (2)', desc: 'Choose cotton for a warmer season and wool/fleece for a colder season.' },
-                    { id: 'pre-18', title: 'Aluminium seamless hot water bottles (2)', desc: 'Check for damage during pregnancy.' },
-                    { id: 'pre-19', title: 'Hot water bottle covers (2)', desc: 'Must not be padded.' }
+                    { id: 'pre-11', title: 'Fitted crib sheets (2-3)', desc: 'Must fit tightly over the mattress.' }
                 ]
             },
             {
@@ -159,97 +237,178 @@
                     { id: 'post-6', title: 'Footed sleepsuits / Pajamas (4-6)', desc: 'Zippers are faster and easier than snaps for night changes.' },
                     { id: 'post-7', title: 'Newborn diapers (2-3 packs)', desc: 'Enough for the first two weeks (expect 8-10 changes/day).' },
                     { id: 'post-8', title: 'Fragrance-free baby wipes', desc: 'Gentle wipes for sensitive newborn skin.' },
-                    { id: 'post-9', title: 'Hydrophilic cloths / Muslin squares (12)', desc: 'Highly absorbent; use as towels, burp cloths, or covers.' },
-                    { id: 'post-10', title: 'Baby bathtub', desc: 'Small, supportive tub with bath stand (preferably with drain plug).' },
+                    { id: 'post-9', title: 'Hydrophilic cloths / Muslin squares (10-15)', desc: 'Highly absorbent; use as towels, burp cloths, or covers.' },
+                    { id: 'post-10', title: 'Baby bathtub', desc: 'Small, supportive tub designed for safe bathing.' },
                     { id: 'post-11', title: 'Changing pad', desc: 'Contoured, wipeable cushion for dresser or changing table.' },
-                    { id: 'post-12', title: 'Burp cloths (8)', desc: 'Soft fabric to catch spit-up after feeds.' },
-                    { id: 'post-13', title: 'Nursing pillow', desc: 'Props baby up for feeding, saving your back and arms (optional).' },
-                    { id: 'post-14', title: 'Newborn baby bottles (2)', desc: 'Good backup to have, even if planning to breastfeed.' },
+                    { id: 'post-12', title: 'Burp cloths (8-10)', desc: 'Soft fabric to catch spit-up after feeds.' },
+                    { id: 'post-13', title: 'Nursing pillow', desc: 'Props baby up for feeding, saving your back and arms.' },
+                    { id: 'post-14', title: 'Newborn baby bottles (2-3)', desc: 'Good backup to have, even if planning to breastfeed.' },
                     { id: 'post-15', title: 'Bottle brush', desc: 'Specialized brush to clean inside bottles and nipples.' },
                     { id: 'post-16', title: 'Breast pump (optional)', desc: 'Useful for relieving engorgement or partner feedings.' },
                     { id: 'post-17', title: 'Swaddle blankets or sleep sacks (2-3)', desc: 'Mimics the womb and prevents startle reflex.' },
-                    { id: 'post-18', title: 'Pacifiers (2)', desc: 'Great for soothing; try a few different shapes (special for newborns).' },
-                    { id: 'post-19', title: 'Digital clinical thermometer (Baby)', desc: 'The most accurate way to check a newborn\'s temperature (no ear/infrared).' },
-                    { id: 'post-20', title: 'Baby nail file or safety clippers', desc: 'Cardboard file prevents scratches from fast-growing newborn nails.' },
-                    { id: 'post-21', title: 'Vitamin D and K drops', desc: 'Consult your pediatrician for dosage to support health.' },
-                    { id: 'post-22', title: 'Digital clinical thermometer (Mother)', desc: 'Separate thermometer for the mother (no ear/infrared).' },
-                    { id: 'post-23', title: 'Hydrophilic washcloths (6)', desc: 'Soft, absorbent washcloths for bathing.' },
-                    { id: 'post-24', title: 'Baby wash gel', desc: 'Gentle cleanser for bath time.' },
-                    { id: 'post-25', title: 'Hair brush & comb', desc: 'Soft bristle brush for newborns.' },
-                    { id: 'post-26', title: 'Bath capes or large bath towels (2)', desc: 'To keep baby warm immediately after bathing.' },
-                    { id: 'post-27', title: 'Vaseline or moisturizing cream', desc: 'For baby\'s face and bottom.' },
-                    { id: 'post-28', title: 'Baby Formula', desc: 'In consultation with obstetrician or family doctor.' },
-                    { id: 'post-29', title: 'Nursing pads', desc: 'To absorb milk leaks.' },
-                    { id: 'post-30', title: 'Breastmilk storage containers/bags', desc: 'Optional: for storing pumped milk.' },
-                    { id: 'post-31', title: 'Breastfeeding starter set', desc: 'Optional: helpful essentials for nursing.' }
-                ]
-            },
-            {
-                id: 'maternity',
-                title: 'Stage 4: Maternity Care & Home Birth Essentials',
-                description: 'Specific household and medical items required for the maternity nurse (Kraamzorg) and home birth.',
-                color: 'bg-rose-500',
-                items: [
-                    { id: 'mat-1', title: 'Toilet paper (1 roll)', desc: 'Extra supply for the birth/maternity kit.' },
-                    { id: 'mat-2', title: 'Package of salt (1)', desc: 'For rinsing birth laundry.' },
-                    { id: 'mat-3', title: 'Buckets (2)', desc: 'At least 1 new or clean to fill baby\'s bath.' },
-                    { id: 'mat-4', title: 'Bin bags (2)', desc: 'For waste disposal during and after birth.' },
-                    { id: 'mat-5', title: 'Kitchen roll / paper towels (1 pack)', desc: 'For quick cleanups.' },
-                    { id: 'mat-6', title: 'Emergency lighting (1 torch)', desc: 'In case of power outages.' },
-                    { id: 'mat-7', title: 'Unperfumed hand gel soap dispenser', desc: 'If not included in basic childbirth set.' },
-                    { id: 'mat-8', title: 'Bottle of disinfectant (1)', desc: 'If required by the obstetrician.' },
-                    { id: 'mat-9', title: 'Plastic sandwich bags (1 box)', desc: 'For disposing of sanitary pads.' },
-                    { id: 'mat-10', title: 'Long sterile gloves (1 pair)', desc: 'Mandatory for the maternity nurse during a water birth.' },
-                    { id: 'mat-11', title: 'Cleaning cloths (6)', desc: 'Must be washable at 60°C.' },
-                    { id: 'mat-12', title: 'Mop with telescopic handle (1)', desc: 'For household cleaning by the maternity nurse.' },
-                    { id: 'mat-13', title: 'Portable laundry basket (1)', desc: 'To easily transport laundry.' },
-                    { id: 'mat-14', title: 'Serving tray (1)', desc: 'For bringing meals to bed during recovery.' }
+                    { id: 'post-18', title: 'Pacifiers (2-3)', desc: 'Great for soothing; try a few different shapes.' },
+                    { id: 'post-19', title: 'Digital rectal thermometer', desc: 'The most accurate way to check a newborn\'s temperature.' },
+                    { id: 'post-20', title: 'Baby nail file or safety clippers', desc: 'Prevents scratches from fast-growing, sharp newborn nails.' },
+                    { id: 'post-21', title: 'Vitamin D and K drops', desc: 'Consult your pediatrician for dosage to support health.' }
                 ]
             }
         ];
 
-        // State Management
+        // Persistence layers: structure of data + checkbox state checked status
+        let checklistData = JSON.parse(localStorage.getItem('babyChecklistData')) || defaultChecklistData;
         let userProgress = JSON.parse(localStorage.getItem('babyChecklistProgress')) || {};
         let currentFilter = 'all'; // 'all', 'pending', 'completed'
 
-        // Save state to local storage
+        // Save progress states to localStorage
         function saveProgress() {
             localStorage.setItem('babyChecklistProgress', JSON.stringify(userProgress));
             updateUI();
         }
 
-        // Reset progress
-        function resetProgress() {
-            if (confirm('Are you sure you want to reset all your progress?')) {
-                userProgress = {};
-                saveProgress();
-            }
+        // Save custom/deleted structure changes to localStorage
+        function saveStructure() {
+            localStorage.setItem('babyChecklistData', JSON.stringify(checklistData));
+            updateUI();
         }
 
-        // Handle checkbox click
+        // Show lightweight toast notifications
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast-message');
+            const toastText = document.getElementById('toast-text');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastText.textContent = message;
+            if (isError) {
+                toastIcon.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            } else {
+                toastIcon.innerHTML = `<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>`;
+            }
+
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        // Reset check states
+        function triggerResetConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('modal-active');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('modal-active');
+        }
+
+        function executeReset() {
+            userProgress = {};
+            saveProgress();
+            closeConfirmModal();
+            showToast('All progress progress has been reset successfully!');
+        }
+
+        // Check/Uncheck action
         function toggleItem(itemId) {
             userProgress[itemId] = !userProgress[itemId];
             saveProgress();
         }
 
-        // Change filter
+        // Filter operations
         function setFilter(filterType) {
             currentFilter = filterType;
             
-            // Update button styles
+            // Reapply styling to filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-white');
                 btn.classList.add('bg-slate-100', 'text-slate-600');
             });
             
             const activeBtn = document.getElementById(`btn-${filterType}`);
-            activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
-            activeBtn.classList.add('bg-slate-800', 'text-white');
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                activeBtn.classList.add('bg-slate-800', 'text-white');
+            }
 
             renderList();
         }
 
-        // Calculate progress statistics
+        // Delete a specific tile from a category list
+        function deleteItem(event, catId, itemId) {
+            // Stop bubble click event from propagating to item row toggle
+            event.stopPropagation();
+            event.preventDefault();
+
+            // Find target category
+            const categoryIndex = checklistData.findIndex(cat => cat.id === catId);
+            if (categoryIndex !== -1) {
+                const initialLength = checklistData[categoryIndex].items.length;
+                checklistData[categoryIndex].items = checklistData[categoryIndex].items.filter(item => item.id !== itemId);
+                
+                if (checklistData[categoryIndex].items.length < initialLength) {
+                    // Clean up tracking status
+                    delete userProgress[itemId];
+                    saveStructure();
+                    saveProgress();
+                    showToast('Item deleted successfully.');
+                }
+            }
+        }
+
+        // Custom interactive add-item dialog controllers
+        function openAddItemModal(categoryId) {
+            document.getElementById('target-category-id').value = categoryId;
+            document.getElementById('item-title').value = '';
+            document.getElementById('item-desc').value = '';
+            
+            const modal = document.getElementById('add-item-modal');
+            modal.classList.add('modal-active');
+            document.getElementById('item-title').focus();
+        }
+
+        function closeAddItemModal() {
+            const modal = document.getElementById('add-item-modal');
+            modal.classList.remove('modal-active');
+        }
+
+        // Create customizable list entry from user modal submit
+        function handleItemSubmit(event) {
+            event.preventDefault();
+            
+            const categoryId = document.getElementById('target-category-id').value;
+            const titleValue = document.getElementById('item-title').value.trim();
+            const descValue = document.getElementById('item-desc').value.trim();
+
+            if (!titleValue) {
+                showToast('Item Name is required!', true);
+                return;
+            }
+
+            const categoryIndex = checklistData.findIndex(cat => cat.id === categoryId);
+            if (categoryIndex !== -1) {
+                const generatedId = `custom-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                const newItem = {
+                    id: generatedId,
+                    title: titleValue,
+                    desc: descValue
+                };
+
+                checklistData[categoryIndex].items.push(newItem);
+                userProgress[generatedId] = false; // Initialise as incomplete
+                
+                saveStructure();
+                saveProgress();
+                closeAddItemModal();
+                showToast('Successfully added item!');
+            } else {
+                showToast('Error adding item: Category not found.', true);
+            }
+        }
+
+        // Calculate progress statistics dynamically based on existing keys
         function getProgressStats() {
             let totalItems = 0;
             let totalCompleted = 0;
@@ -262,7 +421,7 @@
                 categoryStats[category.id] = {
                     total: catTotal,
                     completed: catCompleted,
-                    percentage: Math.round((catCompleted / catTotal) * 100) || 0
+                    percentage: catTotal > 0 ? Math.round((catCompleted / catTotal) * 100) : 0
                 };
 
                 totalItems += catTotal;
@@ -272,20 +431,20 @@
             return {
                 total: totalItems,
                 completed: totalCompleted,
-                percentage: Math.round((totalCompleted / totalItems) * 100) || 0,
+                percentage: totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0,
                 categories: categoryStats
             };
         }
 
-        // Update progress bars and labels
+        // Sync application views
         function updateUI() {
             const stats = getProgressStats();
             
-            // Update overall
+            // Smoothly animate header progress indicator
             document.getElementById('overall-progress-bar').style.width = `${stats.percentage}%`;
             document.getElementById('overall-percentage').textContent = `${stats.percentage}%`;
 
-            // Update categories
+            // Adjust category specific metrics in header and bodies
             checklistData.forEach(category => {
                 const catStats = stats.categories[category.id];
                 const bar = document.getElementById(`progress-${category.id}`);
@@ -295,46 +454,55 @@
                 if (label) label.textContent = `${catStats.completed} / ${catStats.total}`;
             });
 
-            // Re-render list to apply filters and strikethroughs correctly
             renderList();
         }
 
-        // Render the checklist HTML
+        // Complete build workflow for checklist sections
         function renderList() {
             const container = document.getElementById('checklist-container');
             container.innerHTML = '';
 
+            const stats = getProgressStats();
+
             checklistData.forEach(category => {
-                // Filter items for this category based on currentFilter
+                // Filter elements
                 const filteredItems = category.items.filter(item => {
                     const isChecked = !!userProgress[item.id];
                     if (currentFilter === 'pending') return !isChecked;
                     if (currentFilter === 'completed') return isChecked;
-                    return true; // 'all'
+                    return true; 
                 });
 
-                // Skip rendering category if no items match the filter
+                // Do not display empty categories when viewing filtered sections
                 if (filteredItems.length === 0 && currentFilter !== 'all') return;
 
-                const categoryStats = getProgressStats().categories[category.id];
+                const categoryStats = stats.categories[category.id] || { total: 0, completed: 0, percentage: 0 };
 
-                // Create Category Section
+                // Build modern category wrap
                 const section = document.createElement('section');
                 section.className = 'bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden';
                 
-                // Category Header
+                // Section layout containing actionable headers and metrics
                 let headerHTML = `
-                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full ${category.color}"></span>
-                                ${category.title}
-                            </h2>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full ${category.color}"></span>
+                                    ${category.title}
+                                </h2>
+                                <button onclick="openAddItemModal('${category.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 rounded-md transition-colors border border-emerald-100/30">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                                    </svg>
+                                    Add Item
+                                </button>
+                            </div>
                             <p class="text-sm text-slate-500 mt-1 ml-5">${category.description}</p>
                         </div>
-                        <div class="w-full sm:w-48">
+                        <div class="w-full md:w-48">
                             <div class="flex justify-between text-xs font-semibold text-slate-500 mb-1">
-                                <span>Progress</span>
+                                <span>Completed</span>
                                 <span id="text-${category.id}">${categoryStats.completed} / ${categoryStats.total}</span>
                             </div>
                             <div class="w-full bg-slate-200 rounded-full h-2">
@@ -345,29 +513,40 @@
                     <div class="divide-y divide-slate-100">
                 `;
 
-                // Items list
+                // Render specific tiles of items
                 let itemsHTML = '';
                 if (filteredItems.length === 0) {
-                     itemsHTML = `<div class="p-8 text-center text-slate-400 italic">No items found in this view.</div>`;
+                     itemsHTML = `<div class="p-8 text-center text-slate-400 italic">No items found in this section view.</div>`;
                 } else {
                     filteredItems.forEach(item => {
                         const isChecked = !!userProgress[item.id];
                         const textStyle = isChecked ? 'line-through text-slate-400' : 'text-slate-800';
-                        const descStyle = isChecked ? 'opacity-50' : 'text-slate-500';
-                        const bgStyle = isChecked ? 'bg-slate-50' : 'bg-white hover:bg-slate-50';
+                        const descStyle = isChecked ? 'opacity-50 text-slate-400' : 'text-slate-500';
+                        const bgStyle = isChecked ? 'bg-slate-50/50' : 'bg-white hover:bg-slate-50/70';
 
+                        // Checkbox separated dynamically from Delete Button inside absolute structure
                         itemsHTML += `
-                            <label class="item-row flex items-start gap-4 p-5 cursor-pointer transition-colors ${bgStyle}">
-                                <div class="pt-1">
-                                    <input type="checkbox" class="custom-checkbox" 
-                                        ${isChecked ? 'checked' : ''} 
-                                        onchange="toggleItem('${item.id}')">
+                            <div class="item-row flex items-start justify-between gap-4 p-5 transition-colors duration-150 ${bgStyle}">
+                                <label class="flex items-start gap-4 cursor-pointer flex-1 select-none">
+                                    <div class="pt-1">
+                                        <input type="checkbox" class="custom-checkbox" 
+                                            ${isChecked ? 'checked' : ''} 
+                                            onchange="toggleItem('${item.id}')">
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-base transition-colors duration-150 ${textStyle}">${item.title}</h3>
+                                        <p class="text-sm mt-1 transition-opacity duration-150 ${descStyle}">${item.desc || 'No description provided.'}</p>
+                                    </div>
+                                </label>
+                                
+                                <div class="flex items-center">
+                                    <button onclick="deleteItem(event, '${category.id}', '${item.id}')" title="Remove item" class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 active:bg-red-100 transition-all focus:outline-none" aria-label="Delete item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
                                 </div>
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-base transition-colors ${textStyle}">${item.title}</h3>
-                                    <p class="text-sm mt-1 transition-opacity ${descStyle}">${item.desc}</p>
-                                </div>
-                            </label>
+                            </div>
                         `;
                     });
                 }
@@ -377,10 +556,11 @@
             });
         }
 
-        // Initial Load
-        renderList();
-        updateUI();
-
+        // Initialize client app logic
+        window.onload = function() {
+            renderList();
+            updateUI();
+        }
     </script>
 </body>
 </html>
