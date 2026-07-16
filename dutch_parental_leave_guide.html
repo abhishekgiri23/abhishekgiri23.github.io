@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parental Leave Entitlements - Official Dutch Government Regulations (UWV)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        govt: { 800: '#1e3a8a', 700: '#1d4ed8', 50: '#eff6ff' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-govt-800 text-white py-8 px-4 sm:px-6 lg:px-8 border-b-4 border-govt-700">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold mb-2">Parental Leave Entitlements</h1>
+            <p class="text-blue-100 text-lg">Statutory regulations under the Work and Care Act (WAZO) administered by UWV.</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-govt-800 border-b pb-2">Overview</h2>
+            <p class="text-slate-600 leading-relaxed">
+                In the Netherlands, leave associated with the birth, adoption, or fostering of a child is governed by the <strong>Work and Care Act (WAZO)</strong> and administered by the <strong>Employee Insurance Agency (UWV)</strong>. This guide outlines the statutory minimums provided to the public.
+            </p>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">1. Maternity Leave</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6">
+                    <p class="text-slate-700 mb-4">Mothers employed or receiving unemployment benefits are entitled to a minimum of <strong>16 weeks</strong> of leave.</p>
+                    <ul class="space-y-3 text-slate-600 list-inside">
+                        <li class="flex items-start"><span class="mr-2">🤰</span><strong>Pregnancy Leave:</strong> Must start between 6 and 4 weeks before the expected due date.</li>
+                        <li class="flex items-start"><span class="mr-2">👶</span><strong>Maternity Leave:</strong> A minimum of 10 weeks must be taken from the day after childbirth.</li>
+                        <li class="flex items-start"><span class="mr-2">💰</span><strong>Payment:</strong> UWV pays 100% of the daily wage, up to the statutory maximum.</li>
+                        <li class="flex items-start"><span class="mr-2">👯</span><strong>Multiple Births:</strong> Entitled to at least 20 weeks of leave.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">2. Partner Leave (Geboorteverlof)</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-govt-800 mb-2">Standard Partner Leave</h3>
+                    <p class="text-slate-600"><strong>1 working week</strong> of leave to be taken within 4 weeks after the birth. Paid at 100% by the employer.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold text-govt-800 mb-2">Additional Partner Leave</h3>
+                    <p class="text-slate-600 mb-2">Up to <strong>5 working weeks</strong> to be taken within 6 months after the birth.</p>
+                    <div class="text-sm bg-blue-50 text-blue-800 p-3 rounded border border-blue-100">
+                        <strong>Payment:</strong> Paid by UWV at 70% of the daily wage (up to the capped maximum).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">3. Parental Leave (Ouderschapsverlof)</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-slate-700 mb-4">Both parents are entitled to leave for children up to the age of 8. Entitlement: <strong>26 times the weekly working hours</strong>.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="border-l-4 border-emerald-500 bg-emerald-50 p-4">
+                        <h4 class="font-bold text-emerald-800">9 Weeks Paid</h4>
+                        <p class="text-sm text-emerald-900">Paid by UWV at 70% of daily wage. Must be taken in the <strong>first year</strong> of child's life.</p>
+                    </div>
+                    <div class="border-l-4 border-slate-300 bg-slate-50 p-4">
+                        <h4 class="font-bold text-slate-800">17 Weeks Unpaid</h4>
+                        <p class="text-sm text-slate-600">Can be taken at any time until the child turns 8.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">4. Important Regulatory Notes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-900 mb-2">Maximum Daily Wage</h3>
+                    <p class="text-sm text-slate-600">UWV caps all 70% benefits at the "Maximum Daily Wage." High earners may experience a drop in income greater than 30% if their employer does not provide a supplement.</p>
+                </div>
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-900 mb-2">Application</h3>
+                    <p class="text-sm text-slate-600">Employees generally apply through their employer. Employers then route the claim to the UWV. Always notify your employer well in advance (minimum 4 weeks for most optional leaves).</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-10 text-slate-500 text-sm">
+        <p>© 2026 Dutch Government Information Guide. Refer to UWV.nl for the most current statutory updates.</p>
+    </footer>
+
+</body>
+</html>
