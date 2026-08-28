@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer (Target: ~50KB)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800 antialiased flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-gray-100">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold mb-2">Image Resizer</h1>
+            <p class="text-blue-100 text-sm">Upload an image and adjust quality to reach your target file size (e.g., 50KB).</p>
+        </div>
+
+        <div class="p-8">
+            <!-- Upload Section -->
+            <div id="upload-section" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer mb-8">
+                <input type="file" id="image-upload" accept="image/jpeg, image/png, image/webp" class="hidden">
+                <label for="image-upload" class="cursor-pointer flex flex-col items-center justify-center">
+                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    <span class="text-lg font-medium text-gray-700">Click to upload an image</span>
+                    <span class="text-sm text-gray-500 mt-1">Supports JPG, PNG, WEBP</span>
+                </label>
+            </div>
+
+            <!-- Resizing & Preview Section (Hidden initially) -->
+            <div id="editor-section" class="hidden space-y-6">
+                
+                <!-- Controls Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    
+                    <!-- Crop Aspect Ratios (NEW) -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Crop Aspect Ratio</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="ratio-btn px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition" data-ratio="NaN">Free</button>
+                            <button class="ratio-btn px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition" data-ratio="1">1:1 (Square)</button>
+                            <button class="ratio-btn px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition" data-ratio="0.75">3:4 (Passport)</button>
+                            <button class="ratio-btn px-4 py-2 bg-white text-gray-700 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition" data-ratio="1.3333">4:3 (Landscape)</button>
+                        </div>
+                    </div>
+
+                    <!-- Quality Slider -->
+                    <div>
+                        <label for="quality-slider" class="block text-sm font-semibold text-gray-700 mb-2 flex justify-between">
+                            <span>Image Quality (Compression)</span>
+                            <span id="quality-value" class="text-blue-600 font-bold">80%</span>
+                        </label>
+                        <input type="range" id="quality-slider" min="1" max="100" value="80" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <p class="text-xs text-gray-500 mt-2">Lower quality reduces file size significantly.</p>
+                    </div>
+
+                    <!-- Max Dimension Slider -->
+                    <div>
+                        <label for="scale-slider" class="block text-sm font-semibold text-gray-700 mb-2 flex justify-between">
+                            <span>Max Width/Height (Scaling)</span>
+                            <span id="scale-value" class="text-blue-600 font-bold">800px</span>
+                        </label>
+                        <input type="range" id="scale-slider" min="100" max="2000" value="800" step="50" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <p class="text-xs text-gray-500 mt-2">Scaling down dimensions reduces file size.</p>
+                    </div>
+                </div>
+
+                <!-- Stats and Action -->
+                <div class="flex flex-col sm:flex-row justify-between items-center bg-blue-50 p-4 rounded-xl border border-blue-100 gap-4">
+                    <div class="text-center sm:text-left">
+                        <p class="text-sm text-gray-600">Estimated Output Size:</p>
+                        <p id="output-size" class="text-2xl font-bold text-blue-700">-- KB</p>
+                    </div>
+                    <button id="download-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors w-full sm:w-auto flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Image
+                    </button>
+                </div>
+
+                <!-- Preview Areas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <!-- Original -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">Original Image (Crop Here)</h3>
+                        <div class="bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center h-96 relative">
+                            <img id="original-preview" src="" alt="Original Preview" class="max-w-full max-h-full block">
+                            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2 text-center pointer-events-none z-10" id="original-info">
+                                -- KB
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Resized -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">Resized Preview</h3>
+                        <div class="bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center h-96 relative">
+                            <img id="resized-preview" src="" alt="Resized Preview" class="max-w-full max-h-full object-contain">
+                            <div class="absolute bottom-0 left-0 right-0 bg-blue-600 text-white text-xs p-2 text-center font-bold" id="resized-info">
+                                -- KB
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                     <button id="reset-btn" class="text-sm text-gray-500 hover:text-gray-800 underline">Upload a different image</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('image-upload');
+            const uploadSection = document.getElementById('upload-section');
+            const editorSection = document.getElementById('editor-section');
+            
+            const qualitySlider = document.getElementById('quality-slider');
+            const scaleSlider = document.getElementById('scale-slider');
+            const qualityValue = document.getElementById('quality-value');
+            const scaleValue = document.getElementById('scale-value');
+            
+            const originalPreview = document.getElementById('original-preview');
+            const resizedPreview = document.getElementById('resized-preview');
+            const originalInfo = document.getElementById('original-info');
+            const resizedInfo = document.getElementById('resized-info');
+            const outputSizeDisplay = document.getElementById('output-size');
+            
+            const downloadBtn = document.getElementById('download-btn');
+            const resetBtn = document.getElementById('reset-btn');
+
+            let cropper = null;
+            let originalFile = null;
+            let currentBlobUrl = null;
+
+            // Handle file upload
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file (JPG, PNG, or WEBP).');
+                    return;
+                }
+
+                originalFile = file;
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    // Show editor, hide upload
+                    uploadSection.classList.add('hidden');
+                    editorSection.classList.remove('hidden');
+
+                    originalPreview.src = event.target.result;
+                    
+                    const originalKb = (file.size / 1024).toFixed(2);
+                    originalInfo.textContent = `Original: ${originalKb} KB`;
+
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize Cropper.js
+                    cropper = new Cropper(originalPreview, {
+                        viewMode: 2,
+                        autoCropArea: 1,
+                        responsive: true,
+                        cropend: () => { handleInput(); },
+                        ready: () => {
+                            const imgData = cropper.getImageData();
+                            const maxDim = Math.max(imgData.naturalWidth, imgData.naturalHeight);
+                            scaleSlider.max = Math.max(maxDim, 2000);
+                            scaleSlider.value = Math.min(800, maxDim);
+                            updateSliders();
+                            processImage();
+                        }
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Handle drag and drop on upload area
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.classList.add('border-blue-500', 'bg-blue-50');
+            });
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('border-blue-500', 'bg-blue-50');
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            // Update UI values
+            function updateSliders() {
+                qualityValue.textContent = `${qualitySlider.value}%`;
+                scaleValue.textContent = `${scaleSlider.value}px`;
+            }
+
+            // Core processing logic using Canvas
+            function processImage() {
+                if (!cropper) return;
+
+                const quality = qualitySlider.value / 100;
+                const maxDim = parseInt(scaleSlider.value, 10);
+
+                // Get cropped canvas from Cropper.js
+                const croppedCanvas = cropper.getCroppedCanvas();
+                if (!croppedCanvas) return;
+
+                let targetWidth = croppedCanvas.width;
+                let targetHeight = croppedCanvas.height;
+
+                // Calculate aspect ratio keeping max dimension
+                if (targetWidth > maxDim || targetHeight > maxDim) {
+                    if (targetWidth > targetHeight) {
+                        targetHeight = Math.round((targetHeight / targetWidth) * maxDim);
+                        targetWidth = maxDim;
+                    } else {
+                        targetWidth = Math.round((targetWidth / targetHeight) * maxDim);
+                        targetHeight = maxDim;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                const ctx = canvas.getContext('2d');
+                
+                // Use white background for transparent images when converting to JPEG
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw resized image to canvas
+                ctx.drawImage(croppedCanvas, 0, 0, targetWidth, targetHeight);
+
+                // Determine output format
+                let outputFormat = 'image/jpeg';
+                if (originalFile && originalFile.type === 'image/webp') {
+                     outputFormat = 'image/webp'; 
+                }
+
+                // Convert canvas to blob
+                canvas.toBlob((blob) => {
+                    if (currentBlobUrl) {
+                        URL.revokeObjectURL(currentBlobUrl); // Cleanup old url
+                    }
+                    
+                    currentBlobUrl = URL.createObjectURL(blob);
+                    resizedPreview.src = currentBlobUrl;
+
+                    const sizeKb = (blob.size / 1024).toFixed(2);
+                    
+                    // Update UI
+                    resizedInfo.textContent = `${sizeKb} KB (${targetWidth}x${targetHeight})`;
+                    outputSizeDisplay.textContent = `${sizeKb} KB`;
+
+                    // Provide visual feedback if we are close to 50kb
+                    if (blob.size <= 51200) { // 50KB * 1024
+                         outputSizeDisplay.classList.remove('text-blue-700', 'text-red-600');
+                         outputSizeDisplay.classList.add('text-green-600');
+                    } else {
+                         outputSizeDisplay.classList.remove('text-green-600', 'text-blue-700');
+                         outputSizeDisplay.classList.add('text-red-600');
+                    }
+
+                }, outputFormat, quality);
+            }
+
+            // Aspect Ratio Buttons Logic
+            const ratioBtns = document.querySelectorAll('.ratio-btn');
+            ratioBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!cropper) return;
+                    
+                    // Update active button styling
+                    ratioBtns.forEach(b => {
+                        b.classList.remove('bg-blue-600', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-700');
+                    });
+                    e.target.classList.remove('bg-white', 'text-gray-700');
+                    e.target.classList.add('bg-blue-600', 'text-white');
+
+                    const ratio = parseFloat(e.target.dataset.ratio);
+                    cropper.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+                    processImage();
+                });
+            });
+
+            // Event listeners for controls (debounced slightly for performance)
+            let timeout;
+            const handleInput = () => {
+                updateSliders();
+                clearTimeout(timeout);
+                timeout = setTimeout(processImage, 100);
+            };
+
+            qualitySlider.addEventListener('input', handleInput);
+            scaleSlider.addEventListener('input', handleInput);
+
+            // Handle Download
+            downloadBtn.addEventListener('click', () => {
+                if (!currentBlobUrl) return;
+                
+                const a = document.createElement('a');
+                a.href = currentBlobUrl;
+                // create a decent filename
+                const origName = originalFile ? originalFile.name : 'image.jpg';
+                const nameParts = origName.split('.');
+                const ext = nameParts.pop();
+                const baseName = nameParts.join('.');
+                
+                a.download = `${baseName}_resized_50kb.${ext === 'png' ? 'jpg' : ext}`; // Force jpg extension if we compressed as jpeg
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            // Reset
+            resetBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                uploadSection.classList.remove('hidden');
+                editorSection.classList.add('hidden');
+                if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+                
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                originalFile = null;
+            });
+        });
+    </script>
+</body>
+</html>
